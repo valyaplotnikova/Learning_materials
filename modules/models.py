@@ -1,13 +1,24 @@
 from django.db import models
-from timecode.fields import TimecodeField
 
 
-NULLABLE = {'blanck': True, 'null': True}
+NULLABLE = {'blank': True, 'null': True}
 
 
 class Materials(models.Model):
-    test = models.FileField(upload_to='modules/tests/', verbose_name='тест')
-    presentation = models.FileField(upload_to='modules/presentations/', verbose_name='презентация', **NULLABLE)
+    test = models.FileField(
+        upload_to='modules/tests/',
+        verbose_name='тест'
+    )
+    presentation = models.FileField(
+        upload_to='modules/presentations/',
+        verbose_name='презентация',
+        **NULLABLE
+    )
+    file = models.FileField(
+        upload_to='modules/files/',
+        verbose_name='файл',
+        **NULLABLE
+    )
 
     class Meta:
         verbose_name = 'материалы'
@@ -16,9 +27,17 @@ class Materials(models.Model):
 
 class Speaker(models.Model):
 
-    full_name = models.CharField(max_length=150, verbose_name='полное имя')
-    photo = models.ImageField(upload_to='modules/photos/', verbose_name='фото')
-    post = models.TextField(verbose_name='должность')
+    full_name = models.CharField(
+        max_length=150,
+        verbose_name='полное имя'
+    )
+    photo = models.ImageField(
+        upload_to='modules/photos/',
+        verbose_name='фото'
+    )
+    post = models.TextField(
+        verbose_name='должность'
+    )
 
     def __str__(self):
         return f'{self.full_name}, {self.post}'
@@ -31,8 +50,14 @@ class Speaker(models.Model):
 
 class Drug(models.Model):
 
-    drag_name = models.CharField(max_length=150, verbose_name='название препарата')
-    photo = models.ImageField(upload_to='modules/photos/', verbose_name='фото препарата')
+    drag_name = models.CharField(
+        max_length=150,
+        verbose_name='название препарата'
+    )
+    photo = models.ImageField(
+        upload_to='modules/photos/',
+        verbose_name='фото препарата'
+    )
 
     def __str__(self):
         return self.drag_name
@@ -42,9 +67,12 @@ class Drug(models.Model):
         verbose_name_plural = 'препараты'
 
 
-class Pharmcompany(models.Model):
+class Company(models.Model):
 
-    company_name = models.CharField(max_length=150, verbose_name='название компании')
+    company_name = models.CharField(
+        max_length=150,
+        verbose_name='название компании'
+    )
 
     def __str__(self):
         return self.company_name
@@ -55,7 +83,9 @@ class Pharmcompany(models.Model):
 
 
 class Tags(models.Model):
-    tag = models.CharField(max_length=100)
+    tag = models.CharField(
+        max_length=100
+    )
 
     def __str__(self):
         return self.tag
@@ -67,10 +97,15 @@ class Tags(models.Model):
 
 class Timecode(models.Model):
 
-    timecode = TimecodeField
+    time = models.TimeField(
+        verbose_name='временная метка'
+    )
+    description = models.TextField(
+        verbose_name='описание модуля'
+    )
 
     def __str__(self):
-        return self.timecode
+        return f'{self.time} - {self.description}'
 
     class Meta:
         verbose_name = 'таймкод'
@@ -96,7 +131,7 @@ class Module(models.Model):
         verbose_name='фото модуля',
         **NULLABLE
     )
-    timecode = models.ManyToManyField(
+    timecodes = models.ManyToManyField(
         Timecode,
         **NULLABLE,
         related_name='timecodes'
@@ -113,7 +148,7 @@ class Module(models.Model):
     )
     materials = models.ForeignKey(
         Materials,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         verbose_name='материалы курса',
         related_name='materials'
     )
@@ -125,7 +160,7 @@ class Module(models.Model):
         related_name='drugs'
     )
     company = models.ForeignKey(
-        Pharmcompany,
+        Company,
         on_delete=models.SET_NULL,
         verbose_name='компания-спонсор модуля',
         **NULLABLE
@@ -139,3 +174,11 @@ class Module(models.Model):
         verbose_name='модуль в составе курса',
         **NULLABLE
     )
+
+    def __str__(self):
+        return f'{self.name} - {self.description}'
+
+    class Meta:
+        verbose_name = 'модуль'
+        verbose_name_plural = 'модули'
+        # ordering = ['name', 'speakers', 'company', 'drugs']

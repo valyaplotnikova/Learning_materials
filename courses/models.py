@@ -18,29 +18,15 @@ class Course(models.Model):
     )
     modules = models.ForeignKey(
         Module,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         verbose_name='модули курса',
         related_name='modules'
     )
-    speakers = models.ManyToManyField(
-        Speaker,
-        verbose_name='спикеры курса',
-        related_name='speakers'
-    )
-    materials = models.ForeignKey(
-        Materials,
-        on_delete=models.SET_NULL,
-        verbose_name='материалы курса',
-        related_name='materials'
-    )
-    drugs = models.ForeignKey(
-        Drug,
-        on_delete=models.SET_NULL,
-        verbose_name='препараты курса',
-        **NULLABLE,
-        related_name='drugs'
-    )
-    disclaimer = models.TextField(
-        verbose_name='дисклеймер',
-        **NULLABLE
-    )
+
+    def __str__(self):
+        return f'{self.course_name} - {self.description}'
+
+    class Meta:
+        verbose_name = 'курс'
+        verbose_name_plural = 'курсы'
+        # ordering = ['course_name', 'speakers', 'company', 'drugs']
