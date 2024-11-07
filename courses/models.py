@@ -16,9 +16,8 @@ class Course(models.Model):
     description = models.TextField(
         verbose_name='описание курса'
     )
-    modules = models.ForeignKey(
+    modules = models.ManyToManyField(
         Module,
-        on_delete=models.CASCADE,
         verbose_name='модули курса',
         related_name='modules'
     )
