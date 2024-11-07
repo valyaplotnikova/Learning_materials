@@ -5,10 +5,22 @@ from courses.models import Course
 NULLABLE = {'blank': True, 'null': True}
 
 
+class Video(models.Model):
+    video_name = models.CharField(
+        max_length=100,
+        verbose_name='название видео'
+    )
+    video_file = models.FileField(
+        upload_to='modules/video',
+        verbose_name='видео'
+    )
+
+
 class Test(models.Model):
     test = models.FileField(
         upload_to='modules/tests/',
-        verbose_name='тест'
+        verbose_name='тест',
+        **NULLABLE
     )
     test_is_done = models.BooleanField(
         default=False,
@@ -34,6 +46,12 @@ class File(models.Model):
     file_is_done = models.BooleanField(
         default=False,
         verbose_name='отметка о скачивании файла'
+    )
+    module = models.ForeignKey(
+        'Module',
+        on_delete=models.SET_NULL,
+        **NULLABLE,
+        verbose_name='модуль'
     )
 
     class Meta:
@@ -119,6 +137,12 @@ class Timecode(models.Model):
     description = models.TextField(
         verbose_name='описание'
     )
+    video = models.ForeignKey(
+        Video,
+        on_delete=models.CASCADE,
+        verbose_name='видео',
+        **NULLABLE
+    )
 
     def __str__(self):
         return f'{self.time} - {self.description}'
@@ -137,8 +161,9 @@ class Module(models.Model):
     description = models.TextField(
         verbose_name='описание модуля'
     )
-    video = models.FileField(
-        upload_to='modules/videos/',
+    video = models.OneToOneField(
+        Video,
+        on_delete=models.SET_NULL,
         verbose_name='видео модуля',
         **NULLABLE
     )
@@ -165,6 +190,7 @@ class Module(models.Model):
     test = models.ForeignKey(
         Test,
         on_delete=models.CASCADE,
+        **NULLABLE,
         verbose_name='материалы модуля',
         related_name='materials'
     )
