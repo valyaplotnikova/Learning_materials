@@ -1,6 +1,6 @@
 from django.db import models
 
-from modules.models import NULLABLE, Module, Speaker, Materials, Drug
+NULLABLE = {'blank': True, 'null': True}
 
 
 class Course(models.Model):
@@ -15,11 +15,6 @@ class Course(models.Model):
     )
     description = models.TextField(
         verbose_name='описание курса'
-    )
-    modules = models.ManyToManyField(
-        Module,
-        verbose_name='модули курса',
-        related_name='modules'
     )
 
     def __str__(self):

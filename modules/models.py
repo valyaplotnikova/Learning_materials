@@ -1,28 +1,44 @@
 from django.db import models
 
+from courses.models import Course
 
 NULLABLE = {'blank': True, 'null': True}
 
 
-class Materials(models.Model):
+class Test(models.Model):
     test = models.FileField(
         upload_to='modules/tests/',
         verbose_name='тест'
     )
-    presentation = models.FileField(
-        upload_to='modules/presentations/',
-        verbose_name='презентация',
+    test_is_done = models.BooleanField(
+        default=False,
+        verbose_name='отметка о прохождении теста'
+    )
+
+
+class File(models.Model):
+    file_name = models.CharField(
+        max_length=150,
+        verbose_name='название файла',
+        **NULLABLE
+    )
+    file_type = models.CharField(
+        max_length=100,
+        verbose_name='тип файла',
         **NULLABLE
     )
     file = models.FileField(
-        upload_to='modules/files/',
-        verbose_name='файл',
-        **NULLABLE
+        upload_to='modules/files',
+        verbose_name='файл'
+    )
+    file_is_done = models.BooleanField(
+        default=False,
+        verbose_name='отметка о скачивании файла'
     )
 
     class Meta:
-        verbose_name = 'материалы'
-        verbose_name_plural = 'материалы'
+        verbose_name = 'файл'
+        verbose_name_plural = 'файлы'
 
 
 class Speaker(models.Model):
@@ -82,8 +98,8 @@ class Company(models.Model):
         verbose_name_plural = 'компании'
 
 
-class Tags(models.Model):
-    tag = models.CharField(
+class Tag(models.Model):
+    tag_name = models.CharField(
         max_length=100
     )
 
@@ -101,7 +117,7 @@ class Timecode(models.Model):
         verbose_name='временная метка'
     )
     description = models.TextField(
-        verbose_name='описание модуля'
+        verbose_name='описание'
     )
 
     def __str__(self):
@@ -137,7 +153,7 @@ class Module(models.Model):
         related_name='timecodes'
     )
     tags = models.ManyToManyField(
-        Tags,
+        Tag,
         **NULLABLE,
         related_name='tags'
     )
@@ -146,16 +162,16 @@ class Module(models.Model):
         verbose_name='спикеры модуля',
         related_name='speakers'
     )
-    materials = models.ForeignKey(
-        Materials,
+    test = models.ForeignKey(
+        Test,
         on_delete=models.CASCADE,
-        verbose_name='материалы курса',
+        verbose_name='материалы модуля',
         related_name='materials'
     )
     drugs = models.ForeignKey(
         Drug,
         on_delete=models.SET_NULL,
-        verbose_name='препараты курса',
+        verbose_name='препараты модуля',
         **NULLABLE,
         related_name='drugs'
     )
@@ -174,6 +190,7 @@ class Module(models.Model):
         verbose_name='модуль в составе курса',
         **NULLABLE
     )
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, **NULLABLE, verbose_name='курс')
 
     def __str__(self):
         return f'{self.name} - {self.description}'
