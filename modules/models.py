@@ -1,6 +1,6 @@
 from django.db import models
+from config.settings import AUTH_USER_MODEL
 
-from courses.models import Course
 
 NULLABLE = {'blank': True, 'null': True}
 
@@ -14,6 +14,15 @@ class Video(models.Model):
         upload_to='modules/video',
         verbose_name='видео'
     )
+    video_watched = models.BooleanField(
+        default=False,
+        **NULLABLE,
+        verbose_name='видео просмотрено'
+    )
+
+    class Meta:
+        verbose_name = 'видео'
+        verbose_name_plural = 'видео'
 
 
 class Test(models.Model):
@@ -26,6 +35,10 @@ class Test(models.Model):
         default=False,
         verbose_name='отметка о прохождении теста'
     )
+
+    class Meta:
+        verbose_name = 'тест'
+        verbose_name_plural = 'тесты'
 
 
 class File(models.Model):
@@ -122,7 +135,7 @@ class Tag(models.Model):
     )
 
     def __str__(self):
-        return self.tag
+        return self.tag_name
 
     class Meta:
         verbose_name = 'тэг'
@@ -185,14 +198,15 @@ class Module(models.Model):
     speakers = models.ManyToManyField(
         Speaker,
         verbose_name='спикеры модуля',
-        related_name='speakers'
+        related_name='speakers',
+        **NULLABLE
     )
     test = models.ForeignKey(
         Test,
         on_delete=models.CASCADE,
         **NULLABLE,
-        verbose_name='материалы модуля',
-        related_name='materials'
+        verbose_name='тесты модуля',
+        related_name='tests'
     )
     drugs = models.ForeignKey(
         Drug,
@@ -216,7 +230,18 @@ class Module(models.Model):
         verbose_name='модуль в составе курса',
         **NULLABLE
     )
-    course = models.ForeignKey(Course, on_delete=models.SET_NULL, **NULLABLE, verbose_name='курс')
+    course = models.ForeignKey(
+        'Course',
+        on_delete=models.SET_NULL,
+        **NULLABLE,
+        verbose_name='курс'
+    )
+    certificate = models.OneToOneField(
+        'Certificate',
+        on_delete=models.CASCADE,
+        verbose_name='сертификат модуля',
+        **NULLABLE
+    )
 
     def __str__(self):
         return f'{self.name} - {self.description}'
@@ -224,4 +249,52 @@ class Module(models.Model):
     class Meta:
         verbose_name = 'модуль'
         verbose_name_plural = 'модули'
-        # ordering = ['name', 'speakers', 'company', 'drugs']
+        ordering = ['name']
+
+
+class Certificate(models.Model):
+
+    owner = models.ForeignKey(
+        AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name='владелец сертификата'
+    )
+    is_cert = models.BooleanField(
+        default=False,
+        verbose_name='отметка о выдаче сертификата'
+    )
+
+    def __str__(self):
+        return f'{self.owner} - {self.is_cert}'
+
+    class Meta:
+        verbose_name = 'сертификат'
+        verbose_name_plural = 'сертификаты'
+
+
+class Course(models.Model):
+    course_name = models.CharField(
+        max_length=150,
+        verbose_name='название курса'
+    )
+    preview = models.ImageField(
+        upload_to='courses/previews/',
+        verbose_name='изображение курса',
+        **NULLABLE
+    )
+    description = models.TextField(
+        verbose_name='описание курса'
+    )
+    certificate = models.OneToOneField(
+        Certificate,
+        on_delete=models.CASCADE,
+        verbose_name='сертификат курса',
+        **NULLABLE
+    )
+
+    def __str__(self):
+        return f'{self.course_name} - {self.description}'
+
+    class Meta:
+        verbose_name = 'курс'
+        verbose_name_plural = 'курсы'
